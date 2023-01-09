@@ -7,11 +7,15 @@ import (
 )
 
 type Person struct {
-	Id   int `json:"id"`
+	Id   int    `json:"id"`
 	Name string `json:"name"`
 }
 
-var people []Person
+var people = []Person{
+	Person{Id: 1, Name: "hjh"},
+	Person{Id: 2, Name: "jjh"},
+	Person{Id: 3, Name: "wjh"},
+}
 
 func main() {
 	http.HandleFunc("/", handler)
@@ -58,8 +62,18 @@ func getPerson(w http.ResponseWriter, r *http.Request) {
 
 func addPerson(w http.ResponseWriter, r *http.Request) {
 	var person Person
+	var replace Person
 	json.NewDecoder(r.Body).Decode(&person)
-	people = append(people, person)
+	for i, p := range people {
+		if p.Id == person.Id {
+			// replace
+			replace = p
+			people[i] = person
+		}
+	}
+	if replace == (Person{}) {
+		people = append(people, person)
+	}
 	json.NewEncoder(w).Encode(people)
 }
 
